@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import psycopg2
-
+import sys
 
 # tables artcles and log were join through fields slug and path.
 # field slug contained the articles directory and thus required
@@ -66,9 +66,20 @@ query3 = """select to_char(error.date, 'FMMonth FMDD, YYYY') as date
                 desc;"""
 
 
+def connect(database_name):
+    """Connect to the PostgreSQL database.  Returns a database connection."""
+    try:
+        db = psycopg2.connect('dbname={}'.format(str(database_name)))
+        return db
+    except psycopg2.Error as e:
+        print ("Unable to connect to database")
+        # exit the program
+        sys.exit(1)
+
+
 def get_query_results(query):
     # establishes connection to the news data base
-    db = psycopg2.connect(dbname="news")
+    db = connect("news")
     # sets c to interact with psql queries
     c = db.cursor()
     # executes the psql query
@@ -79,18 +90,27 @@ def get_query_results(query):
     db.close()
     return post
 
-print("Top three most viewed articles")
 
-for x in get_query_results(query1):
-    print('"{}" - {} views'.format(x[0], str(x[1])))
+def top_articles():
+    print("Top three most viewed articles")
+    for x in get_query_results(query1):
+        print('"{}" - {} views'.format(x[0], str(x[1])))
 
-print("\nAuthor views")
 
-for x in get_query_results(query2):
-    print('{} - {} views'.format(x[0], str(x[1])))
+def top_authors():
+    print("\nAuthor views")
+    for x in get_query_results(query2):
+        print('{} - {} views'.format(x[0], str(x[1])))
 
-print("\nDay where errors occured more than 1% of total")
 
-ans3 = []
-for x in get_query_results(query3):
-    print('{} - {}%'.format(x[0], str(x[1])))
+def sig_error():
+    print("\nDay where errors occured more than 1% of total")
+    for x in get_query_results(query3):
+        print('{} - {}%'.format(x[0], str(x[1])))
+
+if __name__ == '__main__':
+    top_articles()
+    top_authors()
+    sig_error()
+else:
+    print("This file is imported")
