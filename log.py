@@ -4,7 +4,8 @@ import psycopg2
 
 
 # tables artcles and log were join through fields slug and path.
-# field slug contained the articles directory and thus required concatination to match field path
+# field slug contained the articles directory and thus required
+# concatination to match field path
 query1 = """select articles.title, count(*) as num
                 from articles
                 join log
@@ -14,7 +15,9 @@ query1 = """select articles.title, count(*) as num
                 order by num
                 desc limit 3"""
 
-#this query utilizes the results from the previous query question as a subquery. This query matches the author's id to the name of each author
+# This query utilizes the results from the previous query question as a
+# subquery.
+# This query matches the author's id to the name of each author
 query2 = """select authors.name, sq.num
                 from (select articles.author as authors, count(*) as num
                         from articles
@@ -31,11 +34,13 @@ query2 = """select authors.name, sq.num
                 desc;"""
 
 # this query utilizes two subqueries that are very similar to one another.
- # The first subquery selects all GET requests per day
+# The first subquery selects all GET requests per day
 # The second subquery select all non-sucessful GET request per day
 # fm was used before Month to remove 9 blankspace
-# percentage of error was found be dividing accountants of error to total GET requests. then multiplied by 100
-# during the caluclation, the numbers can to be set to float and numeric to recieve proper decimal points.
+# percentage of error was found be dividing accountants of error
+# to total GET requests. Then multiplied by 100
+# during the caluclation, the numbers can to be set to float and numeric
+# to recieve proper decimal points.
 query3 = """select to_char(error.date, 'FMMonth FMDD, YYYY') as date
                    ,round(((error.errors/total.total::float)*100)::numeric,1)
                as percent
@@ -62,15 +67,15 @@ query3 = """select to_char(error.date, 'FMMonth FMDD, YYYY') as date
 
 
 def get_query_results(query):
-# establishes connection to the news data base
+    # establishes connection to the news data base
     db = psycopg2.connect(dbname="news")
-# sets c to interact with psql queries
+    # sets c to interact with psql queries
     c = db.cursor()
-#executes the psql query
+    # executes the psql query
     c.execute(query)
-#sets post as the result of psql query
+    # sets post as the result of psql query
     post = c.fetchall()
-#closes the database
+    # closes the database
     db.close()
     return post
 
