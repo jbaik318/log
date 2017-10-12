@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import psycopg2
 
 DBNAME = "news"
@@ -53,20 +55,21 @@ def get_q3():
     db = psycopg2.connect(dbname=DBNAME)
     c = db.cursor()
 
-    query = """select error.date, round(((error.errors/total.total::float)*100)::numeric,1)
+    query = """select to_char(error.date, 'FMMonth FMDD, YYYY') as date
+                   ,round(((error.errors/total.total::float)*100)::numeric,1)
                as percent
-                from (select to_char(time::timestamp, 'fmMonth DD, YYYY')
+                from (select date(time)
                 as date, count(*) as total
                         from log
                         where method = 'GET'
-                        group by to_char(time::timestamp, 'fmMonth DD, YYYY')
+                        group by date(time)
                         order by total
                         desc) as total
-               join (select to_char(time::timestamp, 'fmMonth DD, YYYY')
+               join (select date(time)
                as date, count(*) as errors
                         from log
                         where status = '404 NOT FOUND'
-                        group by to_char(time::timestamp, 'fmMonth DD, YYYY')
+                        group by date(time)
                         order by errors
                         desc) as error
                 on total.date = error.date
